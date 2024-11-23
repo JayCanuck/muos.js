@@ -1,8 +1,11 @@
-# muos.js
+# muos.js [![NPM](https://img.shields.io/npm/v/muos.svg?logo=npm)](https://www.npmjs.com/package/muos)
 > Javascript/Typescript definitions and helper functions for [muOS](https://muos.dev/). 
 
 ### Installation
-Install like any other
+Install like any other NPM library:
+```
+npm install --save muos
+```
 
 ### APIs
 The following APIs are available from this `muos` javascript library:
@@ -39,7 +42,7 @@ Parameters:
 Returns:
 * `Record<string, System>` - JSON mapping object
 
-##### `writeAssignJSON`
+##### `readAssignJSON`
 As an alternative to the default [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) values, this API allows you to parse your own JSON file . This function will read a file and resolve System enum values from the ini file values found.
 
 Parameters:
@@ -49,7 +52,14 @@ Returns:
 * `Promise<Record<string, System>>` - Promise which is resolved or rejected on reading and parsing the JSON file, translating the ini file values into System enum values
 
 ##### `writeAssignJSON`
-Get the default assign mapping of common ROM folder names to their respective supported system. Sourced from muOS's [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) file and resolved to the known System enum values.
+Takes a JSON object mapping of ROM folder names to their respective System values and writes an [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) file of the corresponding INI files.
+
+Parameters:
+* `file: string` - Filepath where to write the JSON file
+* `data: Record<string, System>` - Data mapping of ROM folder names to their respective System values
+
+Returns:
+* `Promise<void>` - Promise which is resolved or rejected on writing the JSON file
 
 ##### `version`
 The [muOS version value](https://github.com/MustardOS/internal/blob/main/config/version.txt) string that this library was sourced from.
