@@ -1,0 +1,90 @@
+name: Weekly Update
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Runs every Sunday at midnight UTC
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: false
+          fetch-depth: 2
+
+      - name: Initialize submodule with shallow depth
+        run: |
+          # Initialize the submodule
+          git submodule update --init --recursive --depth 1 -- ./internal
+    
+          # Ensure the submodule is shallow (depth=1)
+          cd ./internal
+          git fetch origin main --depth=1
+          git reset --hard origin/main
+          cd ..
+      
+          # Stage the updated submodule pointer
+          git add ./internal
+
+      - name: Set up Node.js and Cache npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*" # Use the latest LTS Node.js version
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run update script
+        run: npm run update
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff
+          if [[ -n "$(git status ./internal --porcelain)" ]]; then
+            echo "submodules_changes=true" >> $GITHUB_ENV
+          else
+            echo "submodules_changes=false" >> $GITHUB_ENV
+          fi
+          if git diff --quiet HEAD~1 HEAD -- ./src; then
+            echo "src_changed=false" >> $GITHUB_ENV
+          else
+            echo "src_changed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Bump patch version number
+        if: env.src_changed == 'true'
+        run: npm run bump
+
+      - name: Commit changes
+        if: env.submodules_changes == 'true' || env.src_changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Automated weekly update"
+      
+      - name: Push changes
+        if: env.has_changes == 'true' || env.src_changed == 'true'
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+
+      - name: Building source code
+        if: env.src_changed == 'true'
+        run: npm run build
+
+      - name: Publish to npm
+        if: env.src_changed == 'true'
+        uses: JS-DevTools/npm-publish-action@v1.7.1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
