@@ -1,6 +1,6 @@
 {
   "name": "muos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Javascript definitions and helper functions for muOS",
   "main": "./dist/muos.js",
   "types": "./dist/index.d.ts",

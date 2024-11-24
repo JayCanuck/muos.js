@@ -30,6 +30,7 @@ export { System, version } from './data';
 
 export default {
   defaultAssign,
+  readAssignJSON,
   writeAssignJSON,
   System,
   version
