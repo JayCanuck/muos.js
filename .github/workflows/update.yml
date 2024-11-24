@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.2
         with:
           submodules: false
           fetch-depth: 2
@@ -34,7 +34,7 @@ jobs:
           git add ./internal
 
       - name: Set up Node.js and Cache npm
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4.1.0
         with:
           node-version: "lts/*" # Use the latest LTS Node.js version
           cache: "npm"
@@ -74,7 +74,7 @@ jobs:
       
       - name: Push changes
         if: env.has_changes == 'true' || env.src_changed == 'true'
-        uses: ad-m/github-push-action@v0.6.0
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
@@ -85,6 +85,6 @@ jobs:
 
       - name: Publish to npm
         if: env.src_changed == 'true'
-        uses: JS-DevTools/npm-publish-action@v1.7.1
+        uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
