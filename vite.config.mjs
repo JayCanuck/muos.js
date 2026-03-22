@@ -9,22 +9,26 @@ const nodeModules = builtins.builtinModules.concat(builtins.builtinModules.map(m
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts', // Replace with the entry file for your library
-      name: 'muos', // Global variable name for build
-      fileName: () => 'muos.js', // Output file name
-      formats: ['cjs'] // CommonJS format for Node.js compatibility
+      entry: 'src/index.ts',
+      name: 'muos',
+      fileName: format => (format === 'es' ? 'muos.js' : 'muos.cjs'),
+      formats: ['es', 'cjs']
     },
     rollupOptions: {
-      external: nodeModules, // Externalize Node.js built-ins
+      external: nodeModules,
       output: {
         exports: 'named'
       }
     },
-    minify: false // Disable minification
+    minify: false
   },
   plugins: [
     dts({
-      rollupTypes: true // Generate `index.d.ts` for type definitions
+      rollupTypes: true
     })
-  ]
+  ],
+  test: {
+    globals: true,
+    include: ['tests/**/*.test.ts']
+  }
 });

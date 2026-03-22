@@ -6,13 +6,13 @@ import globals from 'globals';
 import { config, configs } from 'typescript-eslint';
 
 export default config(
-  { ignores: ['dist/**/*'] },
+  { ignores: ['dist/**/*', 'internal/**/*'] },
   eslint.configs.recommended,
   eslintPluginPrettierRecommended,
   importPlugin.flatConfigs.recommended,
   // JavaScript files: Apply import and Prettier recommended rules
   {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/.ts'],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
       globals: {
         ...globals.node
@@ -60,7 +60,7 @@ export default config(
       },
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json',
+        project: ['./tsconfig.json', './tsconfig.scripts.json', './tsconfig.tests.json'],
         tsconfigRootDir: import.meta.dirname
       }
     },

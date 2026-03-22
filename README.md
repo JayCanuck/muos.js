@@ -1,82 +1,149 @@
-# muos.js [![NPM](https://img.shields.io/npm/v/muos.svg?logo=npm)](https://www.npmjs.com/package/muos)
-> Javascript/Typescript definitions and helper functions for [muOS](https://muos.dev/). 
+# muos.js
 
-### Installation
-Install like any other NPM library:
-```
-npm install --save muos
+[![NPM](https://img.shields.io/npm/v/muos.svg?logo=npm)](https://www.npmjs.com/package/muos)
+[![CI](https://github.com/jaycanuck/muos.js/actions/workflows/ci.yml/badge.svg)](https://github.com/jaycanuck/muos.js/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/jaycanuck/muos.js)](./LICENSE)
+
+> JavaScript/TypeScript definitions and helper functions for [muOS](https://muos.dev/).
+
+## Installation
+
+```bash
+npm install muos
 ```
 
-### APIs
-The following APIs are available from this `muos` javascript library:
+Works with both ESM and CommonJS:
 
-##### `System`
-An enum of all currently available systems supported by muOS. Each enum entry corresponds to its INI filename as well as the catalogue directories.
+```ts
+// ESM
+import { System, defaultAssign, version } from 'muos';
+
+// CommonJS
+const { System, defaultAssign, version } = require('muos');
 ```
+
+## API
+
+### `System`
+
+An enum of all currently supported systems in muOS. Each entry is keyed by a PascalCase name and valued by its display name (e.g. `'Nintendo N64'`). System definitions are sourced from `.ini` files in [`MustardOS/extra`](https://github.com/MustardOS/extra/tree/main/system/base).
+
+```ts
 import { System } from 'muos';
 
-/*
-  All known system are indexed and avilable for usage.
-    System.Amstrad = 'Amstrad',
-    System.Arcade = 'Arcade',
-    System.Arduboy = 'Arduboy',
-    System.Atari2600 = 'Atari 2600',
-    System.Atari5200 = 'Atari 5200',
-    System.Atari7800 = 'Atari 7800',
-    ...
-*/
+// All known systems are indexed and available
+//   System.Amstrad = 'Amstrad'
+//   System.Arcade = 'Arcade'
+//   System.NintendoN64 = 'Nintendo N64'
+//   ...
 
-// Can use the enum values to derive catalogue paths
-const n64BoxArtPath = `MUOS/info/catalogue/${System.NintendoN64}/box`
+// Derive catalogue paths from enum values
+const n64BoxArt = `MUOS/info/catalogue/${System.NintendoN64}/box`;
 
-// Can use Object.values() to obtain an array of all systems
+// Get an array of all systems
 const allSystems = Object.values(System);
 ```
 
-##### `defaultAssign`
-Get the default assign mapping of common ROM folder names to their respective supported system. Sourced from muOS's [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) file and resolved to the known System enum values.
+### `defaultAssign()`
 
-Parameters:
-* None
+Returns a copy of the default mapping of common ROM folder names to their respective `System` enum value. The mapping is equivalent to the output of muOS's [`assign.sh`](https://github.com/MustardOS/internal/blob/main/script/system/assign.sh), which parses `[friendly]` sections from `.ini` files in [`MustardOS/extra`](https://github.com/MustardOS/extra/tree/main/system/base).
 
-Returns:
-* `Record<string, System>` - JSON mapping object
+- **Returns:** `Record<string, System>`
 
-##### `readAssignJSON`
-As an alternative to the default [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) values, this API allows you to parse your own JSON file . This function will read a file and resolve System enum values from the ini file values found.
+```ts
+import { defaultAssign } from 'muos';
 
-Parameters:
-* `file: string` - Filepath where to read the JSON file
-
-Returns:
-* `Promise<Record<string, System>>` - Promise which is resolved or rejected on reading and parsing the JSON file, translating the ini file values into System enum values
-
-##### `writeAssignJSON`
-Takes a JSON object mapping of ROM folder names to their respective System values and writes an [assign.json](https://github.com/MustardOS/internal/blob/main/init/MUOS/info/assign.json) file of the corresponding INI files.
-
-Parameters:
-* `file: string` - Filepath where to write the JSON file
-* `data: Record<string, System>` - Data mapping of ROM folder names to their respective System values
-
-Returns:
-* `Promise<void>` - Promise which is resolved or rejected on writing the JSON file
-
-##### `version`
-The [muOS version value](https://github.com/MustardOS/internal/blob/main/config/version.txt) string that this library was sourced from.
-
-Example:
+const mapping = defaultAssign();
+console.log(mapping['n64']); // System.NintendoN64
 ```
+
+### `readAssignJSON(file)`
+
+Reads a JSON file in the muOS assign format (folder name → system name) and resolves each entry to its `System` enum value. Supports the format produced by muOS's [`assign.sh`](https://github.com/MustardOS/internal/blob/main/script/system/assign.sh).
+
+- **Parameters:**
+  - `file: string` — Path to the JSON file
+- **Returns:** `Promise<Record<string, System>>`
+
+```ts
+import { readAssignJSON } from 'muos';
+
+const mapping = await readAssignJSON('/path/to/assign.json');
+```
+
+### `writeAssignJSON(file, data)`
+
+Writes a `Record<string, System>` mapping to a JSON file in the muOS assign format (folder name → system name). The output format matches what muOS's [`assign.sh`](https://github.com/MustardOS/internal/blob/main/script/system/assign.sh) produces.
+
+- **Parameters:**
+  - `file: string` — Path where the JSON file will be written
+  - `data: Record<string, System>` — Mapping of folder names to System values
+- **Returns:** `Promise<void>`
+
+```ts
+import { System, writeAssignJSON } from 'muos';
+
+await writeAssignJSON('/path/to/assign.json', {
+  n64: System.NintendoN64,
+  snes: System.NintendoSNESSFC
+});
+```
+
+### `version`
+
+The [muOS version string](https://github.com/MustardOS/internal/blob/main/config/system/version) this library was generated from.
+
+```ts
 import { version } from 'muos';
 
-console.log(version); // "2410.2_BIG_BANANA"
+console.log(version); // e.g. "2410.2_BIG_BANANA"
 ```
 
-### Update Frequency
-This repository is setup with  [muOS internal](https://github.com/MustardOS/internal/tree/main) as a submodule to generate it's data from.  It is setup to automatically update the submodule and reflect any changes detected upstream. When data changes are detect (for example, a new added system), the library is updated and an update is published to NPM as an incremental patch release.  The `version` value export can be used to validate which version of muOS this library is generated from.
+## Update Frequency
 
-### License
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+A GitHub Actions workflow runs weekly to check for upstream changes in the [MustardOS/extra](https://github.com/MustardOS/extra) and [MustardOS/internal](https://github.com/MustardOS/internal) repositories. It uses the GitHub REST API (Git Trees API + raw file fetches) to fetch only the required data — no git clone needed.
 
-http://www.apache.org/licenses/LICENSE-2.0
+When changes to system definitions or assign mappings are detected, the library is automatically updated, the patch version is bumped, and a new release is published to npm.
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+The `version` export can be used to determine which muOS release this library was generated from.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Lint
+npm run lint
+
+# Build (outputs ESM + CJS to dist/)
+npm run build
+
+# Fetch latest muOS data and regenerate src/data.ts
+npm run update
+
+# Bump the patch version
+npm run bump
+```
+
+### Project Structure
+
+```
+src/           — Library source (TypeScript)
+  index.ts     — Public API exports
+  data.ts      — Auto-generated system enum, assign map, and version
+scripts/       — Dev tooling (TypeScript, not included in npm package)
+  update.ts    — Fetches upstream muOS data via GitHub REST API
+  bump.ts      — Bumps package.json patch version
+tests/         — Unit tests (vitest)
+dist/          — Build output (ESM + CJS + types)
+```
+
+## License
+
+Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+See [LICENSE](./LICENSE) for the full text.
