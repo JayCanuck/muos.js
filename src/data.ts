@@ -421,4 +421,4 @@ export const assign: Record<string, System> = {
   'swanstation': System.SonyPlayStation
 };
 
-export const version = '2601.2_MIDNIGHT_JACARANDA';
+export const version = '2606.0_ANDROMEDA';
