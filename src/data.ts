@@ -216,7 +216,6 @@ export const assign: Record<string, System> = {
   'nintendones': System.NintendoNESFamicom,
   'nintendofamicom': System.NintendoNESFamicom,
   'nintendoentertainmentsystem': System.NintendoNESFamicom,
-  'nintendo': System.NintendoNESFamicom,
   'ninnes': System.NintendoNESFamicom,
   'neshacks': System.NintendoNESFamicom,
   'nesfc': System.NintendoNESFamicom,
